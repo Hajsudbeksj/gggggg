@@ -3,18 +3,15 @@ import mysql.connector
 import os
 import sys
 
-app = Flask(name)
+app = Flask(__name__)  # ← تم تصحيح هذا
 
-# لم يعد هناك مفتاح أمان مخزّن في الملف
-# التطبيق يقرأ SECRET_KEY من متغيرات البيئة فقط.
+# قراءة SECRET_KEY من متغير البيئة
 secret = os.environ.get('SECRET_KEY')
 if not secret:
-    # نوقف التشغيل ونوضح للمستخدم ما يجب فعله
     sys.exit("ERROR: يرجى تعيين متغير البيئة SECRET_KEY قبل تشغيل التطبيق.")
-
 app.secret_key = secret
 
-# إعداد قاعدة البيانات من متغيرات البيئة
+# إعداد قاعدة البيانات
 db_config = {
     'host': os.environ.get('DB_HOST', 'sql.freedb.tech'),
     'user': os.environ.get('DB_USER', 'freedb_Jsskjsbsd'),
@@ -57,7 +54,7 @@ def dashboard():
     conn.close()
     return render_template('dashboard.html', grades=grades)
 
-# API لتسجيل الدخول (اختياري)
+# API لتسجيل الدخول
 @app.route('/api/login', methods=['POST'])
 def api_login():
     data = request.get_json()
@@ -73,7 +70,7 @@ def api_login():
     else:
         return jsonify({"success": False, "message": "اسم أو كلمة مرور خاطئة"})
 
-# API لجلب الدرجات (اختياري)
+# API لجلب الدرجات
 @app.route('/api/grades/<int:student_id>', methods=['GET'])
 def get_grades(student_id):
     conn = get_db_connection()
@@ -83,6 +80,6 @@ def get_grades(student_id):
     conn.close()
     return jsonify({"grades": grades})
 
-if name == 'main':
+if __name__ == '__main__':  # ← تم تصحيح هذا
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
