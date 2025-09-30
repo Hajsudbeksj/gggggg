@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة الدرجات</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>درجاتك</h2>
+        <table>
+            <tr>
+                <th>المادة</th>
+                <th>الدرجة</th>
+            </tr>
+            {% for grade in grades %}
+            <tr>
+                <td>{{ grade.subject }}</td>
+                <td>{{ grade.grade }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <a href="{{ url_for('login_page') }}">تسجيل خروج</a>
+    </div>
+</body>
+</html>
