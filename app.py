@@ -4,6 +4,7 @@ from psycopg2.extras import RealDictCursor
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
 import os
+import socket  # ← تم إضافة هذا
 
 # -------------------------
 # قراءة متغيرات البيئة
@@ -26,7 +27,6 @@ app.config['SECRET_KEY'] = SECRET_KEY
 app.permanent_session_lifetime = timedelta(hours=4)
 
 db_config = {
-    'host': DB_HOST,
     'port': DB_PORT,
     'database': DB_NAME,
     'user': DB_USER,
@@ -35,14 +35,22 @@ db_config = {
 }
 
 # -------------------------
-# دالة اتصال قاعدة البيانات
+# دالة اتصال قاعدة البيانات مع فرض IPv4
 # -------------------------
 def get_db_connection():
-    return psycopg2.connect(**db_config, cursor_factory=RealDictCursor)
+    ipv4_host = socket.gethostbyname(DB_HOST)  # ← حل اسم الدومين إلى IPv4
+    return psycopg2.connect(
+        host=ipv4_host,
+        port=db_config['port'],
+        database=db_config['database'],
+        user=db_config['user'],
+        password=db_config['password'],
+        sslmode=db_config['sslmode'],
+        cursor_factory=RealDictCursor
+    )
 
 # -------------------------
-# باقي الكود يبقى كما هو
-# صفحة تسجيل الدخول، لوحة الدرجات، APIs
+# صفحة تسجيل الدخول
 # -------------------------
 @app.route('/', methods=['GET', 'POST'])
 def login_page():
@@ -70,6 +78,9 @@ def login_page():
 
     return render_template('login.html')
 
+# -------------------------
+# لوحة الدرجات
+# -------------------------
 @app.route('/dashboard')
 def dashboard():
     student_id = session.get('student_id')
